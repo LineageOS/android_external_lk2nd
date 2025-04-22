@@ -28,6 +28,7 @@ extern void cmd_continue(const char *arg, void *data, unsigned sz);
 enum fbcon_colors {
 	WHITE = FBCON_TITLE_MSG,
 	SILVER = FBCON_SUBTITLE_MSG,
+	LINEAGE_TEAL = FBCON_LINEAGE_TEAL_MSG,
 	YELLOW = FBCON_YELLOW_MSG,
 	ORANGE = FBCON_ORANGE_MSG,
 	RED = FBCON_RED_MSG,
@@ -191,7 +192,7 @@ void display_fastboot_menu(void)
 	scale_factor = old_scale;
 	incr = FONT_HEIGHT * scale_factor;
 
-	fbcon_puts_ln(SILVER, y, incr, true, LK2ND_VERSION);
+	fbcon_puts_ln(LINEAGE_TEAL, y, incr, true, LK2ND_VERSION);
 	if (lk2nd_dev.model)
 		fbcon_puts_ln(SILVER, y, incr, true, lk2nd_dev.model);
 	else
@@ -300,6 +301,6 @@ void display_default_image_on_screen(void)
 	fbcon_clear_msg(y / FONT_HEIGHT, y / FONT_HEIGHT + 3 * scale_factor);
 
 	fbcon_puts_ln(WHITE, y, incr, true, xstr(BOARD));
-	fbcon_puts_ln(SILVER, y, incr, true, LK2ND_VERSION);
+	fbcon_puts_ln(LINEAGE_TEAL, y, incr, true, LK2ND_VERSION);
 	fbcon_flush();
 }

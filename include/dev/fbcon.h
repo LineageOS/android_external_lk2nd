@@ -61,6 +61,7 @@ enum fbcon_msg_type {
 	FBCON_UNLOCK_TITLE_MSG,
 	FBCON_TITLE_MSG,
 	FBCON_SUBTITLE_MSG,
+	FBCON_LINEAGE_TEAL_MSG,
 
 	/* type for warning */
 	FBCON_YELLOW_MSG,

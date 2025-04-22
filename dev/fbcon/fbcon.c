@@ -63,6 +63,7 @@ static struct fbcon_config *config = NULL;
 #define RGB565_ORANGE		0xfd20
 #define RGB565_RED		0xf800
 #define RGB565_GREEN		0x3666
+#define RGB565_LINEAGE_TEAL	0x13f0
 
 #define RGB888_BLACK            0x000000
 #define RGB888_WHITE            0xffffff
@@ -73,6 +74,7 @@ static struct fbcon_config *config = NULL;
 #define RGB888_ORANGE           0xffa500
 #define RGB888_RED              0xff0000
 #define RGB888_GREEN            0x00ff00
+#define RGB888_LINEAGE_TEAL     0x167c80
 
 #define FONT_WIDTH		5
 #define FONT_HEIGHT		12
@@ -92,6 +94,7 @@ static struct fb_color		fb_color_formats_555[] = {
 					[FBCON_UNLOCK_TITLE_MSG] = {RGB565_RED, RGB565_BLACK},
 					[FBCON_TITLE_MSG] = {RGB565_WHITE, RGB565_BLACK},
 					[FBCON_SUBTITLE_MSG] = {RGB565_SILVER, RGB565_BLACK},
+					[FBCON_LINEAGE_TEAL_MSG] = {RGB565_LINEAGE_TEAL, RGB565_BLACK},
 					[FBCON_YELLOW_MSG] = {RGB565_YELLOW, RGB565_BLACK},
 					[FBCON_ORANGE_MSG] = {RGB565_ORANGE, RGB565_BLACK},
 					[FBCON_RED_MSG] = {RGB565_RED, RGB565_BLACK},
@@ -103,6 +106,7 @@ static struct fb_color		fb_color_formats_888[] = {
 					[FBCON_UNLOCK_TITLE_MSG] = {RGB888_RED, RGB888_BLACK},
 					[FBCON_TITLE_MSG] = {RGB888_WHITE, RGB888_BLACK},
 					[FBCON_SUBTITLE_MSG] = {RGB888_SILVER, RGB888_BLACK},
+					[FBCON_LINEAGE_TEAL_MSG] = {RGB888_LINEAGE_TEAL, RGB888_BLACK},
 					[FBCON_YELLOW_MSG] = {RGB888_YELLOW, RGB888_BLACK},
 					[FBCON_ORANGE_MSG] = {RGB888_ORANGE, RGB888_BLACK},
 					[FBCON_RED_MSG] = {RGB888_RED, RGB888_BLACK},
