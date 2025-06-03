@@ -103,6 +103,97 @@ static void partition_split_flash(struct ptable *ptable, const char *base_name,
 	base->length -= length;
 }
 
+#ifdef PROJECT_LK2ND_MI8916
+static void partition_split_mmc_mi8916(uint32_t block_size)
+{
+#define VIRTUAL_BOOT_SIZE (48*1024*1024)
+#define VIRTUAL_RECOVERY_SIZE (72*1024*1024)
+#define VIRTUAL_METADATA_SIZE (32*1024*1024)
+#define TOTAL_FIXED_VIRTUAL_SIZE (VIRTUAL_BOOT_SIZE + VIRTUAL_RECOVERY_SIZE + VIRTUAL_METADATA_SIZE)
+
+	unsigned long long virtual_boot_blocks = VIRTUAL_BOOT_SIZE / block_size;
+	unsigned long long virtual_recovery_blocks = VIRTUAL_RECOVERY_SIZE / block_size;
+	unsigned long long virtual_metadata_blocks = VIRTUAL_METADATA_SIZE / block_size;
+	unsigned long long total_fixed_virtual_blocks = TOTAL_FIXED_VIRTUAL_SIZE / block_size;
+
+	int index;
+	struct partition_entry *base, *real_boot, *real_recovery, *v_boot, *v_recovery, *v_metadata;
+	unsigned long long next_first_lba;
+
+	index = partition_get_index("cache");
+	if (index == INVALID_PTN) {
+		dprintf(CRITICAL, "base partition not found\n");
+		return;
+	}
+	base = &partition_get_partition_entries()[index];
+
+	index = partition_get_index("boot");
+	if (index == INVALID_PTN) {
+		dprintf(CRITICAL, "real boot partition not found\n");
+		return;
+	}
+	real_boot = &partition_get_partition_entries()[index];
+
+	index = partition_get_index("recovery");
+	if (index == INVALID_PTN) {
+		dprintf(CRITICAL, "real recovery partition not found\n");
+		return;
+	}
+	real_recovery = &partition_get_partition_entries()[index];
+
+	index = partition_get_index("metadata");
+	if (index != INVALID_PTN) {
+		dprintf(CRITICAL, "real metadata partition is found\n");
+		return;
+	}
+
+	if (base->size < total_fixed_virtual_blocks) {
+		dprintf(CRITICAL, "base partition has not enough space (%llu < %llu)\n",
+			base->size, total_fixed_virtual_blocks);
+		return;
+	}
+
+	next_first_lba = base->first_lba;
+
+	v_boot = partition_allocate();
+	if (!v_boot) goto err_partition_allocate;
+	memcpy(v_boot, base, sizeof(*v_boot));
+	snprintf((char*)real_boot->name, sizeof(real_boot->name), "lk2nd");
+	snprintf((char*)v_boot->name, sizeof(v_boot->name), "boot");
+	v_boot->size = virtual_boot_blocks;
+	v_boot->first_lba = next_first_lba;
+	v_boot->last_lba = v_boot->first_lba + v_boot->size - 1;
+	next_first_lba = v_boot->last_lba + 1;
+
+	v_recovery = partition_allocate();
+	if (!v_recovery) goto err_partition_allocate;
+	memcpy(v_recovery, base, sizeof(*v_recovery));
+	snprintf((char*)real_recovery->name, sizeof(real_recovery->name), "lk2nd_recovery");
+	snprintf((char*)v_recovery->name, sizeof(v_recovery->name), "recovery");
+	v_recovery->size = virtual_recovery_blocks;
+	v_recovery->first_lba = next_first_lba;
+	v_recovery->last_lba = v_recovery->first_lba + v_recovery->size - 1;
+	next_first_lba = v_recovery->last_lba + 1;
+
+	v_metadata = partition_allocate();
+	if (!v_metadata) goto err_partition_allocate;
+	memcpy(v_metadata, base, sizeof(*v_metadata));
+	snprintf((char*)v_metadata->name, sizeof(v_metadata->name), "metadata");
+	v_metadata->size = virtual_metadata_blocks;
+	v_metadata->first_lba = next_first_lba;
+	v_metadata->last_lba = v_metadata->first_lba + v_metadata->size - 1;
+	next_first_lba = v_metadata->last_lba + 1;
+
+	base->first_lba = next_first_lba;
+	base->size = base->last_lba - base->first_lba + 1;
+
+	return;
+
+err_partition_allocate:
+	dprintf(CRITICAL, "failed to allocate partition\n");
+}
+#endif
+
 static void lk2nd_partition_split_mmc(void)
 {
 	uint32_t block_size __UNUSED = mmc_get_device_blocksize();
@@ -116,6 +207,9 @@ static void lk2nd_partition_split_mmc(void)
 	partition_split_mmc(LK2ND_RECOVERY_PARTITION_BASE,
 			    LK2ND_RECOVERY_PARTITION_NAME,
 			    LK2ND_RECOVERY_PARTITION_SIZE / block_size, false);
+#endif
+#ifdef PROJECT_LK2ND_MI8916
+	partition_split_mmc_mi8916(block_size);
 #endif
 }
 
