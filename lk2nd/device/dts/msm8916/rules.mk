@@ -1,6 +1,12 @@
 # SPDX-License-Identifier: BSD-3-Clause
 LOCAL_DIR := $(GET_LOCAL_DIR)
 
+ifeq ($(PROJECT),lk2nd-mi8916)
+QCDTBS += \
+	$(LOCAL_DIR)/msm8916-qrd-7+12.dtb \
+
+else
+
 ADTBS += \
 	$(LOCAL_DIR)/msm8939-qrd-skuk.dtb  \
 
@@ -45,3 +51,5 @@ QCDTBS += \
 	$(LOCAL_DIR)/msm8939-qrd-wt82918hd.dtb \
 	$(LOCAL_DIR)/msm8939-samsung.dtb \
 	$(LOCAL_DIR)/msm8939-xiaomi-ido.dtb \
+
+endif
