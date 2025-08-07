@@ -50,6 +50,7 @@
 #endif
 #include <boot_stats.h>
 #include <verifiedboot.h>
+#include <lk2nd/device.h>
 
 #define NODE_PROPERTY_MAX_LEN   64
 #define ADD_OF(a, b) (UINT_MAX - b > a) ? (a + b) : UINT_MAX
@@ -400,6 +401,15 @@ static boolean dtb_read_find_match(dt_info *current_dtb_info, dt_info *best_dtb_
 		dprintf(CRITICAL, "ERROR: Unable to locate root node\n");
 		return false;
 	}
+
+#if WITH_LK2ND_DEVICE
+	if (fdt_node_check_compatible(dtb, root_offset, lk2nd_device_get_compatible()) == 0) {
+		dprintf(SPEW, "Compatible %s matches, mark as best dtb node\n", lk2nd_device_get_compatible());
+		current_dtb_info->dt_match_val = UINT_MAX;
+		current_dtb_info->dt_match_val &= ~exact_match;
+		goto cleanup;
+	}
+#endif
 
 	/* Get the msm-id prop from DTB and find best match */
 	platform_prop = (const char *)fdt_getprop(dtb, root_offset, "qcom,msm-id", &platform_id_len);

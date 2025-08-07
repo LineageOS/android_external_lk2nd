@@ -23,6 +23,14 @@ const char *const *lk2nd_device_get_dtb_hints(void)
 	return lk2nd_dev.dtbfiles;
 }
 
+/**
+ * lk2nd_device_get_compatible() - Get a compatible string.
+ */
+const char *lk2nd_device_get_compatible(void)
+{
+	return lk2nd_dev.compatible;
+}
+
 static int find_device_node(const void *dtb)
 {
 	int lk2nd_node, node, ret;
