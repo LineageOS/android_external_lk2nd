@@ -37,6 +37,7 @@ import os
 import sys
 import re
 from optparse import OptionParser
+from pathlib import Path
 
 soc_ids = {
 		'msm8660'        : 71,
@@ -142,8 +143,14 @@ boot_device_ids = { 'emmc_sdc1' : 2, 'ufs' : 4 }
 boot_device_ids_mdm = { 'emmc_sdc1' : 3 }
 panel_ids = { 'hd' : 0, '720p' : 1, 'qHD' : 2, 'fWVGA' : 3 }
 
+# Get AOSP libfdt.so from the source tree if it exists
+script_dir = Path(__file__).resolve().parent
+lk2nd_root = script_dir / ".." / ".."
+source_root = lk2nd_root / ".." / ".."
+aosp_libfdt = source_root / "prebuilts" / "kernel-build-tools" / "linux-x86" / "lib64" / "libfdt.so"
+
 # Load libfdt using a number of possible filenames used by distributions
-libfdt_fnames = ['libfdt.so', 'libfdt.so.1', "libfdt.dylib"]
+libfdt_fnames = [aosp_libfdt, 'libfdt.so', 'libfdt.so.1', "libfdt.dylib"]
 libfdt = None
 
 for fname in libfdt_fnames:
