@@ -17,6 +17,7 @@ ADTBS += \
 	$(LOCAL_DIR)/msm8953-xiaomi-daisy.dtb \
 	$(LOCAL_DIR)/msm8953-xiaomi-markw.dtb \
 	$(LOCAL_DIR)/msm8953-xiaomi-oxygen.dtb \
+	$(LOCAL_DIR)/msm8953-xiaomi-uter.dtb \
 	$(LOCAL_DIR)/msm8953-xiaomi-vince.dtb \
 	$(LOCAL_DIR)/sdm450-motorola-ali.dtb \
 	$(LOCAL_DIR)/sdm450-samsung-r04.dtb \
