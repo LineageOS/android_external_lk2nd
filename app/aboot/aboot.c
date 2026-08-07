@@ -203,6 +203,7 @@ static const char *warmboot_cmdline = " qpnp-power-on.warm_boot=1";
 static const char *baseband_apq_nowgr   = " androidboot.baseband=baseband_apq_nowgr";
 static const char *androidboot_slot_suffix = " androidboot.slot_suffix=";
 static const char *skip_ramfs = " skip_initramfs";
+static const char *force_normal_boot = " androidboot.force_normal_boot=1";
 
 #if HIBERNATION_SUPPORT
 static const char *resume = " resume=/dev/mmcblk0p";
@@ -743,6 +744,11 @@ unsigned char *update_cmdline(const char * cmdline)
 		if (!target_dynamic_partition_supported() &&
 			!boot_into_recovery)
 			cmdline_len += strlen(skip_ramfs);
+
+		if (target_dynamic_partition_supported() &&
+			partition_multislot_is_supported() &&
+			!boot_into_recovery)
+			cmdline_len += strlen(force_normal_boot);
 	}
 
 #if HIBERNATION_SUPPORT
@@ -1029,6 +1035,15 @@ unsigned char *update_cmdline(const char * cmdline)
 				while ((*dst++ = *src++));
 			}
 
+			if (target_dynamic_partition_supported() &&
+				partition_multislot_is_supported() &&
+				!boot_into_recovery)
+			{
+				src = force_normal_boot;
+				--dst;
+				while ((*dst++ = *src++));
+			}
+
 			src = sys_path_cmdline;
 			--dst;
 			while ((*dst++ = *src++));
@@ -1223,6 +1238,8 @@ void boot_linux(void *kernel, unsigned *tags,
 		boot_type |= BOOT_ANDROID;
 	if (strcmp(cmdline, "lk2nd") == 0)
 		boot_type |= BOOT_LK2ND;
+	if (boot_into_recovery)
+		boot_type |= BOOT_ANDROID_RECOVERY;
 
 	final_cmdline = update_cmdline2(cmdline, boot_type);
 
