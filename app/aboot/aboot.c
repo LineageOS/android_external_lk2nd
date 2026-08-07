@@ -203,6 +203,7 @@ static const char *warmboot_cmdline = " qpnp-power-on.warm_boot=1";
 static const char *baseband_apq_nowgr   = " androidboot.baseband=baseband_apq_nowgr";
 static const char *androidboot_slot_suffix = " androidboot.slot_suffix=";
 static const char *skip_ramfs = " skip_initramfs";
+static const char *force_normal_boot = " androidboot.force_normal_boot=1";
 
 #if HIBERNATION_SUPPORT
 static const char *resume = " resume=/dev/mmcblk0p";
@@ -743,6 +744,11 @@ unsigned char *update_cmdline(const char * cmdline)
 		if (!target_dynamic_partition_supported() &&
 			!boot_into_recovery)
 			cmdline_len += strlen(skip_ramfs);
+
+		if (target_dynamic_partition_supported() &&
+			partition_multislot_is_supported() &&
+			!boot_into_recovery)
+			cmdline_len += strlen(force_normal_boot);
 	}
 
 #if HIBERNATION_SUPPORT
@@ -1029,6 +1035,15 @@ unsigned char *update_cmdline(const char * cmdline)
 				while ((*dst++ = *src++));
 			}
 
+			if (target_dynamic_partition_supported() &&
+				partition_multislot_is_supported() &&
+				!boot_into_recovery)
+			{
+				src = force_normal_boot;
+				--dst;
+				while ((*dst++ = *src++));
+			}
+
 			src = sys_path_cmdline;
 			--dst;
 			while ((*dst++ = *src++));
@@ -1204,7 +1219,7 @@ typedef void entry_func_ptr(unsigned, unsigned, unsigned*);
 void boot_linux(void *kernel, unsigned *tags,
 		const char *cmdline, unsigned machtype,
 		void *ramdisk, unsigned ramdisk_size,
-		enum boot_type boot_type)
+		enum boot_type boot_type, bool is_fastboot_boot)
 {
 	unsigned char *final_cmdline;
 #if DEVICE_TREE
@@ -1223,6 +1238,10 @@ void boot_linux(void *kernel, unsigned *tags,
 		boot_type |= BOOT_ANDROID;
 	if (strcmp(cmdline, "lk2nd") == 0)
 		boot_type |= BOOT_LK2ND;
+
+	if (boot_type & BOOT_ANDROID &&
+		(boot_into_recovery || is_fastboot_boot))
+		boot_type |= BOOT_ANDROID_RECOVERY;
 
 	final_cmdline = update_cmdline2(cmdline, boot_type);
 
@@ -2304,7 +2323,7 @@ unified_boot:
 	boot_linux((void *)hdr->kernel_addr, (void *)hdr->tags_addr,
 		   (const char *)hdr->cmdline, board_machtype(),
 		   (void *)hdr->ramdisk_addr, hdr->ramdisk_size,
-		   boot_type);
+		   boot_type, false);
 
 	return 0;
 }
@@ -2606,7 +2625,7 @@ continue_boot:
 	boot_linux((void *)hdr->kernel_addr, (void *)hdr->tags_addr,
 		   (const char *)hdr->cmdline, board_machtype(),
 		   (void *)hdr->ramdisk_addr, hdr->ramdisk_size,
-		   boot_type);
+		   boot_type, false);
 
 	return 0;
 }
@@ -3592,7 +3611,7 @@ void cmd_boot(const char *arg, void *data, unsigned sz)
 	boot_linux((void*) hdr->kernel_addr, (void*) hdr->tags_addr,
 		   (const char*) hdr->cmdline, board_machtype(),
 		   (void*) hdr->ramdisk_addr, hdr->ramdisk_size,
-		   boot_type);
+		   boot_type, true);
 
 	/* fastboot already stop, it's no need to show fastboot menu */
 	return;

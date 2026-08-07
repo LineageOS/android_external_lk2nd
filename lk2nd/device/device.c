@@ -225,8 +225,14 @@ unsigned char *lk2nd_device_update_cmdline(const char *cmdline, enum boot_type b
 		cmdline = "lk2nd.compatible=" LK2ND_COMPATIBLE;
 #endif
 #if WITH_LK2ND_DEVICE_2ND
-	if (lk2nd_dev.cmdline)
-		return concat_cmdline(cmdline, lk2nd_dev.cmdline);
+	unsigned char *new_cmdline = NULL;
+	if (lk2nd_dev.cmdline) {
+		new_cmdline = concat_cmdline(cmdline, lk2nd_dev.cmdline);
+		if ((boot_type & BOOT_ANDROID) && !(boot_type & BOOT_ANDROID_RECOVERY)) {
+			new_cmdline = concat_cmdline(new_cmdline, "androidboot.force_normal_boot=1");
+		}
+		return new_cmdline;
+	}
 #endif
 	return update_cmdline(cmdline);
 }
